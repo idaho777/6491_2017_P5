@@ -40,8 +40,6 @@ class Triangle {
     beam(A, B, rt);
     beam(B, C, rt);
     beam(C, A, rt);
-    //fill(red); show(circumcenter2D2(A, B, C), rt);
-    //fill(cyan); show(circumcenter2D(A, B, C), rt*2);
   }
   
   vec N() {
@@ -85,17 +83,14 @@ pt circumcenter2D (pt A, pt B, pt C) {
   vec I = U(V(A, B));
   vec J = U(cross(planeNormal, I));
   vec N = U(R(V(A, B), -PI/2, I, J));
-  //vec N = U(R(V(A, B)));
   if (dot(N, V(A, C)) < 0) { N = M(N); }
   
   pt Q = P(A, 0.5, C);
   vec M = U(R(V(A, C), PI/2, I, J)).mul(300);
-  //vec M = R(V(A, C)).normalize().mul(300);
   
   vec V1 = V(Q, O);
   vec V2 = V(Q, P(Q, M));
   vec V3 = R(N, PI/2, I, J);
-  //vec V3 = R(N);
   
   float t = dot(V1, V3)/dot(V2, V3);
   return P(Q, t, P(Q, M));

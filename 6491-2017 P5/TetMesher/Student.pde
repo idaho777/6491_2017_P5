@@ -305,13 +305,13 @@ List<pt> sampleBallPoints(pt p) {
   vec K = V(0, 0, 1);
   vec rad = V(rb, K);
   
-  float step = TAU/circumPts/2;
+  float step = PI/(circumPts);
   points.add(P(p, rad));
   points.add(P(p, M(rad)));
   boolean on = false;
-  for (int i = 0; i < (circumPts-2); ++i) {
+  for (int i = 0; i < (circumPts-1); ++i) { // Top Down
     rad = R(rad, step, K, I);
-    for (int j = 0; j < circumPts; ++j) {
+    for (int j = 0; j < 2*circumPts; ++j) {
       points.add(P(p, R(rad, j*step + ((on) ? step/2 : 0), I, J)));
     }
     on =! on;
@@ -322,11 +322,10 @@ List<pt> sampleBallPoints(pt p) {
 
 
 // Ball Rolling =========================================================================================================
-float ballRadius = rt;
-VoxelSpace voxelSpace;
 List<Triangle> ballRollPointCloud(List<List<pt>> pointCloud) {
+  println("BALL ROLL POINT CLOUD");
+  println("This should take couple of seconds...");
   voxelSpace = setupVoxelSpace(pointCloud);
-  
   List<Triangle> triangulation = new ArrayList<Triangle>();
   
   int index = pointCloud.get(0).size()/2;
@@ -347,48 +346,54 @@ List<Triangle> ballRollPointCloud(List<List<pt>> pointCloud) {
     BB = currTri.B;
     CC = currTri.C;
     
-    //Edge AABB = EDGE(AA, BB);
-    //Edge BBCC = EDGE(BB, CC);
-    //Edge CCAA = EDGE(CC, AA);
-    
     if (triangulation.contains(currTri)) continue;
     triangulation.add(currTri);
 
-    Triangle leftTri = getBallRollTriangle(AA, CC, currTri, pointCloud);
+    Triangle leftTri = getBallRollTriangle(AA, CC, currTri, voxelSpace);
     if (leftTri  != null && !stack.contains(leftTri )) stack.add(leftTri);
   
-    Triangle rightTri = getBallRollTriangle(CC, BB, currTri, pointCloud);
+    Triangle rightTri = getBallRollTriangle(CC, BB, currTri, voxelSpace);
     if (rightTri != null && !stack.contains(rightTri)) stack.add(rightTri);
   }
-  
+  println("Ball Roll Complete");
   return triangulation;
 }
 
 
-
-
-
-
 List<Triangle> candTri = new ArrayList<Triangle>();
 List<Tetrahedron> candTet = new ArrayList<Tetrahedron>();
-Triangle getBallRollTriangle(pt L, pt R, Triangle tri, List<List<pt>> pointCloud) {
-  println("getBallRoll");
+Triangle getBallRollTriangle(pt L, pt R, Triangle tri, VoxelSpace voxelSpace) {
   List<pt> candidatePoints = new ArrayList<pt>();
   
   pt triCC2D = circumcenter2D(tri.A, tri.B, tri.C);
   pt triCC3D = P(triCC2D, sqrt(sq(ballRadius) - sq(d(triCC2D, tri.A))), tri.N());
   pt LRmid = P(L, 0.5, R);
   
-  // Get candidate points
-  for (List<pt> l : pointCloud) {  // Find candidate points the ball can roll on
-    for (pt p : l) {
-      if (tri.contains(p)) continue;
-      pt cc2D = circumcenter2D(L, R, p);
-      if (d(cc2D, LRmid) < d(triCC3D, LRmid)) {
-        Triangle t = TRI(L, R, p);
-        if (abs(dot(U(V(t.A, t.B)), U(V(t.B, t.C)))) == 1) continue;
-        candidatePoints.add(p);
+  pt cc2DVoxIndex = P(voxelSpace.getX(triCC2D), voxelSpace.getY(triCC2D), voxelSpace.getZ(triCC2D));
+  
+  List<pt> voxelPoints = new ArrayList<pt>();
+  voxelPoints.addAll(voxelSpace.getVoxel(triCC2D));
+  for (int x = -1; x <=1; ++x) {
+    for (int y = -1; y <=1; ++y) {
+      for (int z = -1; z <=1; ++z) {
+        pt b = P(triCC2D, V(x*ballRadius*2, y*ballRadius*2, z*ballRadius*2));
+        pt bIndex = P(voxelSpace.getX(b), voxelSpace.getY(b), voxelSpace.getZ(b));
+        if (!cc2DVoxIndex.equals(bIndex)) {
+          voxelPoints.addAll(voxelSpace.getVoxel(b));
+        }
       }
+    }  
+  }
+    
+  // Get candidate points
+  // Find candidate points the ball can roll on
+  for (pt p : voxelPoints) {
+    if (tri.contains(p)) continue;
+    pt cc2D = circumcenter2D(L, R, p);
+    if (d(cc2D, LRmid) < d(triCC3D, LRmid)) {
+      Triangle t = TRI(L, R, p);
+      if (abs(dot(U(V(t.A, t.B)), U(V(t.B, t.C)))) == 1) continue;
+      candidatePoints.add(p);
     }
   }
   

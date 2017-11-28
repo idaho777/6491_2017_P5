@@ -1,4 +1,4 @@
-      Tetrahedron TETRA(pt A, pt B, pt C, pt D) { return new Tetrahedron(A, B, C, D); }
+Tetrahedron TETRA(pt A, pt B, pt C, pt D) { return new Tetrahedron(A, B, C, D); }
 
 class Tetrahedron {
   pt A, B, C, D;

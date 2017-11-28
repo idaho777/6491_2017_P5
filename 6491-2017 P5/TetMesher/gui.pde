@@ -14,7 +14,7 @@ void keyPressed()
   if(key=='5') {R.resetOnCircle(5,500); }
   if(key=='h') rt=rb/2;
   if(key=='H') rt=rb;
-  if(key=='p') waterTight=!waterTight;
+  if(key=='m') waterTight=!waterTight;
   if(key=='q') Q.copyFrom(P);
   if(key=='d') {R.set_pv_to_pp(); R.deletePicked();}
   if(key=='W') {P.savePts("data/pts"); Q.savePts("data/pts2");}  // save vertices to pts2
@@ -86,6 +86,6 @@ void displayFooter()  // Displays help text at the bottom
     scribeFooter(menu,0); 
     }
 
-String title ="Lattice Maker", name ="TEAM NAMES",
+String title ="Lattice Maker", name ="Joonho Kim",
        menu="?:help, t/T:move view, space:rotate view, `/wheel:zoom, !:picture, ~:(start/stop) filming,  #:quit",
-       guide="click&drag:pick&slide, f:flip ceiling/floor, x/X:move picked/all, p/P:perturb, X:slide All, |:snap heights, l/L:load, w/W:write"; // user's guide
+       guide="click&drag:pick&slide, f:flip ceiling/floor, x/X:move picked/all, m: water-tight mesh, X:slide All, |:snap heights, l/L:load, w/W:write"; // user's guide

@@ -1,7 +1,6 @@
 Edge EDGE(pt A, pt B) { return new Edge(A, B); }
 
-int circumPts = 16;
-float edgeStepLen = 2*PI*rt/circumPts;
+
 class Edge {
   pt A, B;
   
@@ -21,6 +20,7 @@ class Edge {
   
   
   List<pt> samplePoints() {
+    float edgeStepLen = 2*PI*rt/circumPts;
     List<pt> list = new ArrayList<pt>();
     vec skewer = V(A, B);
     vec I = U(cross(skewer, R(skewer)));

@@ -46,8 +46,12 @@ void setup() {
   R=P; S=Q;
   }
 
+int circumPts = 12;
+float ballRadius = rt;
 
 List<List<pt>> g_pointCloud;
+VoxelSpace voxelSpace;
+
 void draw() {
   println("loop");
   background(255);
@@ -57,7 +61,7 @@ void draw() {
   showFloor(h); // draws dance floor as yellow mat
   doPick(); // sets Of and axes for 3D GUI (see pick Tab)
   R.SETppToIDofVertexWithClosestScreenProjectionTo(Mouse()); // for picking (does not set P.pv)
-
+  ballRadius = rt*0.8;
   // Get Delaunay Triangulation from both planes
   Triangle[] P_DELAUNAY = getDelaunayTriangulation2D(P);
   Triangle[] Q_DELAUNAY = getDelaunayTriangulation2D(Q);
@@ -77,7 +81,7 @@ void draw() {
   } else {
     g_pointCloud = null;
   }
-  println(R.G[0]);
+  
   noFill();
   noStroke();  
   if(showTube) {
@@ -90,16 +94,6 @@ void draw() {
     fill(green); Q.drawBalls(rb);  
     fill(red,100); R.showPicked(rb+5); 
   }
-  
-  //if (g_pointCloud != null) {
-  //  noStroke();
-  //  fill(magenta);
-  //  for (List<pt> l : g_pointCloud) {
-  //    for (pt p : l) {
-  //      show(p, 1);
-  //    }
-  //  }
-  //}
   
   if (waterTight && triangulation != null) {
     for(Triangle t : triangulation) {
