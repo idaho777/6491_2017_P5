@@ -17,7 +17,9 @@ Boolean
   showQuads=true,
   showVecs=true,
   showTube=true,
+  showTriEdge=true,
   waterTight=false,
+  waterAnimate=false,
   flipped = false;
 float 
  h_floor=0, h_ceiling=600,  h=h_floor,
@@ -46,14 +48,16 @@ void setup() {
   R=P; S=Q;
   }
 
-int circumPts = 12;
-float ballRadius = rt;
+int circumPts = 16;
+int aniSpeed = 100;
+float edgeStepLen;
+float ballRadius = 0;
 
 List<List<pt>> g_pointCloud;
+List<Triangle> triangulation;
 VoxelSpace voxelSpace;
 
 void draw() {
-  println("loop");
   background(255);
   hint(ENABLE_DEPTH_TEST); 
   pushMatrix();   // to ensure that we can restore the standard view before writing on the canvas
@@ -61,7 +65,9 @@ void draw() {
   showFloor(h); // draws dance floor as yellow mat
   doPick(); // sets Of and axes for 3D GUI (see pick Tab)
   R.SETppToIDofVertexWithClosestScreenProjectionTo(Mouse()); // for picking (does not set P.pv)
-  ballRadius = rt*0.8;
+  
+  edgeStepLen = 2*PI*rt/float(circumPts);
+  ballRadius = 0.7*max(edgeStepLen, TWO_PI*rt/float(circumPts));
   // Get Delaunay Triangulation from both planes
   Triangle[] P_DELAUNAY = getDelaunayTriangulation2D(P);
   Triangle[] Q_DELAUNAY = getDelaunayTriangulation2D(Q);
@@ -74,13 +80,27 @@ void draw() {
   List<Edge> g_beams = getBeams(tets);
   
   // Get sample points from Beams and beam ends
-  List<Triangle> triangulation = null;
   if (waterTight) {
-    g_pointCloud = samplePointCloud(g_beams, R, S);
-    triangulation = ballRollPointCloud(g_pointCloud);
+    waterAnimate = false;
+    if (g_pointCloud == null) {
+      g_pointCloud = samplePointCloud(g_beams, R, S);
+      triangulation = ballRollPointCloud(g_pointCloud);
+    }
+  } else if (waterAnimate) {
+    waterTight = false;
+    if (g_pointCloud == null) {
+      g_pointCloud = samplePointCloud(g_beams, R, S);
+      ballRollAnimation(g_pointCloud);
+    } else {
+      for (int i = 0; i < aniSpeed; i++) {
+        ballRollAnimationStep(); 
+      }
+    }
   } else {
     g_pointCloud = null;
+    triangulation = null;
   }
+  
   
   noFill();
   noStroke();  
@@ -95,23 +115,31 @@ void draw() {
     fill(red,100); R.showPicked(rb+5); 
   }
   
-  if (waterTight && triangulation != null) {
+  //if (g_pointCloud != null) {
+  //  for (List<pt> l : g_pointCloud) {
+  //    for(pt p : l) {
+  //      noStroke();
+  //      fill(yellow);
+  //      show(p, 1);
+  //    }
+  //  }
+  //}
+  
+  if ((waterTight || waterAnimate) && triangulation != null) {
     for(Triangle t : triangulation) {
       fill(yellow);
-      stroke(orange);
-      strokeWeight(2);
+      if (showTriEdge) {
+        stroke(orange);
+        strokeWeight(1);
+      } else {
+        noStroke();
+      }
       t.drawShape();
     }
   }
     
   popMatrix(); // done with 3D drawing. Restore front view for writing text on canvas
   hint(DISABLE_DEPTH_TEST); // no z-buffer test to ensure that help text is visible
-
-  //*** TEAM: please fix these so that they provice the correct counts
-  scribeHeader("Site count: "+3+" floor + "+7+" ceiling",1);
-  scribeHeader("Beam count: "+3+" floor + "+7+" ceiling +"+6+" mixed",2);
-  scribeHeader("Tet count: "+20,3);
- 
   // used for demos to show red circle when mouse/key is pressed and what key (disk may be hidden by the 3D model)
   if(mousePressed) {stroke(cyan); strokeWeight(3); noFill(); ellipse(mouseX,mouseY,20,20); strokeWeight(1);}
   if(keyPressed) {stroke(red); fill(white); ellipse(mouseX+14,mouseY+20,26,26); fill(red); text(key,mouseX-5+14,mouseY+4+20); strokeWeight(1); }

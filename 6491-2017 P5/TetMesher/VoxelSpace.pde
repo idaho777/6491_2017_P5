@@ -76,7 +76,7 @@ public class VoxelSpace {
 
 
 VoxelSpace setupVoxelSpace(List<List<pt>> pointCloud) {
-  VoxelSpace vs = new VoxelSpace(P(0, 0, 0), P(3000, 3000, h_ceiling), 200);
+  VoxelSpace vs = new VoxelSpace(P(0, 0, 0), P(3000, 3000, h_ceiling), 50);
   for (List<pt> l : pointCloud) {
     for (pt p : l) {
       vs.addPt(p);

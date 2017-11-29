@@ -20,7 +20,6 @@ class Edge {
   
   
   List<pt> samplePoints() {
-    float edgeStepLen = 2*PI*rt/circumPts;
     List<pt> list = new ArrayList<pt>();
     vec skewer = V(A, B);
     vec I = U(cross(skewer, R(skewer)));
@@ -32,7 +31,7 @@ class Edge {
     boolean on = false;
     while (d(curr, A) < d(A, B)) {
       for (int i = 0; i < circumPts; ++i) {
-        list.add(P(curr, R(rad, i*TAU/circumPts + ((on) ? PI/circumPts : 0), I, J)));
+        list.add(P(curr, R(rad, i*TAU/circumPts - ((on) ? PI/circumPts : 0), I, J)));
       }
       on = !on;
       curr = P(curr, edgeStepLen, U(skewer));
@@ -40,7 +39,7 @@ class Edge {
     
     if (d(curr, A) != d(A, B)) {
       for (int i = 0; i < circumPts; ++i) {
-        list.add(P(B, R(rad, i*TAU/circumPts + ((on) ? PI/circumPts : 0), I, J)));
+        list.add(P(B, R(rad, i*TAU/circumPts - ((on) ? PI/circumPts : 0), I, J)));
       }
     }
     
